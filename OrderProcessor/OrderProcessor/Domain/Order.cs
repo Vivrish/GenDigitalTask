@@ -19,6 +19,8 @@ public class Order
     public string? Currency { get; set; }
     public decimal? PaidAmount { get; set; } = 0;
     public required OrderStatus Status { get; set; }
+    
+    private Order () {}
 
     public Order(string orderCode, string productCode, decimal totalPrice, string currency)
     {
