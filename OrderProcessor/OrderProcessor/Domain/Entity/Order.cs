@@ -18,22 +18,12 @@ public class Order
     public decimal? TotalPrice { get; set; }
     public string? Currency { get; set; }
     public decimal? PaidAmount { get; set; } = 0;
-    public required OrderStatus Status { get; set; }
+    public OrderStatus Status { get; set; }
     
-    private Order () {}
+    public Order() {}
 
-    public Order(string orderCode, string productCode, decimal totalPrice, string currency)
+    public override string ToString()
     {
-        OrderCode = orderCode;
-        ProductCode = productCode;
-        TotalPrice = totalPrice;
-        Currency = currency;
-        Status = OrderStatus.WaitingForPayment;
-    }
-
-    public Order(decimal paidAmount)
-    {
-        PaidAmount = paidAmount;
-        Status = OrderStatus.WaitingForProduct;
+        return $"Order: {OrderCode}, Product: {ProductCode}, Total: {TotalPrice} {Currency}, Status: {Status}";
     }
 }
