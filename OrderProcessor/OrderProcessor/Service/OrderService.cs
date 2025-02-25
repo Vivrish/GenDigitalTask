@@ -15,6 +15,7 @@ public class OrderService(ApplicationDbContext context)
         if (order == null)
         {
             await _context.Orders.AddAsync(OrderConverter.OrderEventToNewOrder(orderEvent));
+            await _context.SaveChangesAsync();
             return;
         }
         if (order.Status != OrderStatus.WaitingForProduct) {
@@ -44,6 +45,7 @@ public class OrderService(ApplicationDbContext context)
         if (order == null)
         {
             await _context.Orders.AddAsync(OrderConverter.PaymentEventToOrder(paymentEvent));
+            await _context.SaveChangesAsync();
             return;
         }
 
