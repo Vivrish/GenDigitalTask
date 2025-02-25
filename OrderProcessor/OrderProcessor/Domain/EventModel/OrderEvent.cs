@@ -2,9 +2,16 @@ namespace OrderProcessor.Domain;
 
 public class OrderEvent(string id, string product, decimal total, string currency)
 {
-    public required string Id { get; set; } = id;
-    public required string Product { get; set; } = product;
-    public required decimal Total { get; set; } = total;
-    public required string Currency { get; set; } = currency;
+    public string id { get; set; } = id;
+    public string product { get; set; } = product;
+    public decimal total { get; set; } = total;
+
+    public override string ToString()
+    {
+        return
+            $"{nameof(id)}: {id}, {nameof(product)}: {product}, {nameof(total)}: {total}, {nameof(currency)}: {currency}";
+    }
+
+    public string currency { get; set; } = currency;
 }
     

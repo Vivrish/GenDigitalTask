@@ -8,7 +8,8 @@ public static class OrderConverter
     {
         return new Order
         {
-            PaidAmount = paymentEvent.Amount,
+            OrderCode = paymentEvent.orderId,
+            PaidAmount = paymentEvent.amount,
             Status = OrderStatus.WaitingForProduct
         };
     }
@@ -17,10 +18,10 @@ public static class OrderConverter
     {
         return new Order
         {
-            OrderCode = orderEvent.Id,
-            Currency = orderEvent.Currency,
-            ProductCode = orderEvent.Product,
-            TotalPrice = orderEvent.Total,
+            OrderCode = orderEvent.id,
+            Currency = orderEvent.currency,
+            ProductCode = orderEvent.product,
+            TotalPrice = orderEvent.total,
             Status = OrderStatus.WaitingForPayment
         };
     }

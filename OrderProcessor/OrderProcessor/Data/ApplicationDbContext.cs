@@ -11,7 +11,5 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         modelBuilder.Entity<Order>()
             .HasKey(o => o.Id);
-        modelBuilder.Entity<Order>()
-            .HasKey(o => o.Status);
     }
 }

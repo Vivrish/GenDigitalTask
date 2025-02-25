@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderProcessor.Data;
+using OrderProcessor.Service;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((context, config) =>
@@ -15,6 +16,8 @@ var host = Host.CreateDefaultBuilder(args)
         var configuration = context.Configuration;
         var connectionString = configuration.GetConnectionString("PostgresDb");
         services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddHostedService<ListenerService>();
+        services.AddScoped<OrderService>();
     })
     .Build();
 

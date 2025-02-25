@@ -20,10 +20,18 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672" 
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      retries: 5
+      start_period: 20s
 
   order-processor:
     build: ./OrderProcessor
     container_name: order-processor
     depends_on:
-      - postgres
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      

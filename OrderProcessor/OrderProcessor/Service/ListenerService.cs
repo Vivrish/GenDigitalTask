@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderProcessor.Domain;
 using OrderProcessor.Exception;
@@ -9,9 +10,9 @@ using RabbitMQ.Client.Events;
 
 namespace OrderProcessor.Service;
 
-public class ListenerService(OrderService orderService, IConfiguration configuration): BackgroundService
+public class ListenerService(IServiceScopeFactory scopeFactory, IConfiguration configuration): BackgroundService
 {
-    private readonly OrderService _orderService = orderService;
+    private readonly IServiceScopeFactory _serviceScopeFactory = scopeFactory;
     private readonly IConfiguration _configuration = configuration;
     private IChannel _channel;
     private IConnection _connection;
@@ -40,7 +41,12 @@ public class ListenerService(OrderService orderService, IConfiguration configura
         var message = Encoding.UTF8.GetString(bytes);
         try
         {
-            await ProcessMessageAsync(message, ea.BasicProperties.Headers);
+            using (var scope = _serviceScopeFactory.CreateScope())
+            {
+                var orderService = scope.ServiceProvider.GetRequiredService<OrderService>();
+                await ProcessMessageAsync(message, ea.BasicProperties.Headers, orderService);
+            }
+
             await _channel.BasicAckAsync(ea.DeliveryTag, false);
         }
         catch (System.Exception e)
@@ -50,7 +56,7 @@ public class ListenerService(OrderService orderService, IConfiguration configura
         }
     }
 
-    private async Task ProcessMessageAsync(string message, IDictionary<string, object?>? headers)
+    private async Task ProcessMessageAsync(string message, IDictionary<string, object?>? headers, OrderService orderService)
     {
         if (headers == null || !headers.TryGetValue("X-MsgType", out var header))
         {
@@ -62,13 +68,13 @@ public class ListenerService(OrderService orderService, IConfiguration configura
             case "OrderEvent":
             {
                 var orderEvent = JsonSerializer.Deserialize<OrderEvent>(message);
-                await _orderService.ProcessOrderEvent(orderEvent ?? throw new InvalidOperationException("Failed to deserialize an event"));
+                await orderService.ProcessOrderEvent(orderEvent ?? throw new InvalidOperationException("Failed to deserialize an event"));
                 break;
             }
             case "PaymentEvent":
             {
                 var paymentEvent = JsonSerializer.Deserialize<PaymentEvent>(message);
-                await _orderService.ProcessPaymentEvent(paymentEvent ?? throw new InvalidOperationException("Failed to deserialize an event"));
+                await orderService.ProcessPaymentEvent(paymentEvent ?? throw new InvalidOperationException("Failed to deserialize an event"));
                 break;
             }
             default:
